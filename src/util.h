@@ -53,7 +53,7 @@
 #include "global.h"
 #ifdef _WIN32
 # include <winsock2.h>
-# include <ws2ipdef.h>
+# include <ws2tcpip.h>
 # include <windows.h>
 # include <mmsystem.h>
 #elif defined ( __APPLE__ ) || defined ( __MACOSX )
@@ -420,35 +420,6 @@ protected:
 
 public slots:
     void OnAgreeStateChanged ( int value ) { butAccept->setEnabled ( value == Qt::Checked ); }
-};
-
-
-// Musician profile dialog -----------------------------------------------------
-class CMusProfDlg : public CBaseDlg
-{
-    Q_OBJECT
-
-public:
-    CMusProfDlg ( CClient* pNCliP,
-                  QWidget* parent = nullptr );
-
-protected:
-    virtual void showEvent ( QShowEvent* );
-
-    QLineEdit* pedtAlias;
-    QComboBox* pcbxInstrument;
-    QComboBox* pcbxCountry;
-    QLineEdit* pedtCity;
-    QComboBox* pcbxSkill;
-
-    CClient* pClient;
-
-public slots:
-    void OnAliasTextChanged ( const QString& strNewName );
-    void OnInstrumentActivated ( int iCntryListItem );
-    void OnCountryActivated ( int iCntryListItem );
-    void OnCityTextChanged ( const QString& strNewName );
-    void OnSkillActivated ( int iCntryListItem );
 };
 
 
@@ -950,18 +921,14 @@ class CChannelInfo : public CChannelCoreInfo
 {
 public:
     CChannelInfo() :
-        iChanID ( 0 ),
-        iIpAddr ( 0 ) {}
+        iChanID ( 0 ) {}
 
     CChannelInfo ( const int               NiID,
-                   const quint32           NiIP,
                    const CChannelCoreInfo& NCorInf ) :
         CChannelCoreInfo ( NCorInf ),
-        iChanID ( NiID ),
-        iIpAddr ( NiIP ) {}
+        iChanID ( NiID ) {}
 
     CChannelInfo ( const int               NiID,
-                   const quint32           NiIP,
                    const QString           NsName,
                    const QLocale::Country& NeCountry,
                    const QString&          NsCity,
@@ -972,14 +939,10 @@ public:
                            NsCity,
                            NiInstrument,
                            NeSkillLevel ),
-        iChanID ( NiID ),
-        iIpAddr ( NiIP ) {}
+        iChanID ( NiID ) {}
 
     // ID of the channel
     int     iChanID;
-
-    // IP address of the channel
-    quint32 iIpAddr;
 };
 
 

@@ -58,6 +58,8 @@ CHighPrecisionTimer::CHighPrecisionTimer ( const bool bNewUseDoubleSystemFrameSi
     veciTimeOutIntervals[1] = 1;
     veciTimeOutIntervals[2] = 0;
 
+    Timer.setTimerType ( Qt::PreciseTimer );
+
     // connect timer timeout signal
     QObject::connect ( &Timer, &QTimer::timeout,
         this, &CHighPrecisionTimer::OnTimer );
@@ -222,6 +224,7 @@ void CHighPrecisionTimer::run()
 CServer::CServer ( const int          iNewMaxNumChan,
                    const QString&     strLoggingFileName,
                    const quint16      iPortNumber,
+                   const quint16      iQosNumber,
                    const QString&     strHTMLStatusFileName,
                    const QString&     strCentralServer,
                    const QString&     strServerInfo,
@@ -238,7 +241,7 @@ CServer::CServer ( const int          iNewMaxNumChan,
     bUseDoubleSystemFrameSize   ( bNUseDoubleSystemFrameSize ),
     bUseMultithreading          ( bNUseMultithreading ),
     iMaxNumChannels             ( iNewMaxNumChan ),
-    Socket                      ( this, iPortNumber ),
+    Socket                      ( this, iPortNumber, iQosNumber ),
     Logging                     ( ),
     iFrameCount                 ( 0 ),
     bWriteStatusHTMLFile        ( false ),
@@ -721,6 +724,11 @@ void CServer::OnAboutToQuit()
     if ( GetServerListEnabled() )
     {
         UnregisterSlaveServer();
+    }
+
+    if ( bWriteStatusHTMLFile )
+    {
+        WriteHTMLServerQuit();
     }
 }
 
@@ -1415,10 +1423,8 @@ CVector<CChannelInfo> CServer::CreateChannelList()
     {
         if ( vecChannels[i].IsConnected() )
         {
-            // append channel ID, IP address and channel name to storing vectors
             vecChanInfo.Add ( CChannelInfo (
                 i, // ID
-                QHostAddress ( QHostAddress::Null ).toIPv4Address(), // use invalid IP address (for privacy reason, #316)
                 vecChannels[i].GetChanInfo() ) );
         }
     }
@@ -1745,6 +1751,21 @@ void CServer::WriteHTMLChannelList()
             streamFileOut << "</ul>\n";
         }
     }
+}
+
+void CServer::WriteHTMLServerQuit()
+{
+    // prepare file and stream
+    QFile serverFileListFile ( strServerHTMLFileListName );
+
+    if ( !serverFileListFile.open ( QIODevice::WriteOnly | QIODevice::Text ) )
+    {
+        return;
+    }
+
+    QTextStream streamFileOut ( &serverFileListFile );
+    streamFileOut << "  Server terminated\n";
+    serverFileListFile.close();
 }
 
 void CServer::customEvent ( QEvent* pEvent )

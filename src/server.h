@@ -172,6 +172,7 @@ public:
     CServer ( const int          iNewMaxNumChan,
               const QString&     strLoggingFileName,
               const quint16      iPortNumber,
+              const quint16      iQosNumber,
               const QString&     strHTMLStatusFileName,
               const QString&     strCentralServer,
               const QString&     strServerInfo,
@@ -306,6 +307,7 @@ protected:
     inline void connectChannelSignalsToServerSlots();
 
     void WriteHTMLChannelList();
+    void WriteHTMLServerQuit();
 
     void DecodeReceiveDataBlocks ( const int iStartChanCnt,
                                    const int iStopChanCnt,
